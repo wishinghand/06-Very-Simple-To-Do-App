@@ -16,18 +16,4 @@ todoApp.controller('addTodo', function($scope){
         $scope.todos.splice(removalIndex, 1);
     }
 
-    $scope.orderByHigh = function (){
-        //var removalIndex = indexof the thing
-        $scope.todos.priority.sort()
-    }
-
-    $scope.orderByLow = function (){
-        //var removalIndex = indexof the thing
-        $scope.todos.priority.sort().reverse
-    }
-
-    $scope.orderAlphabetically = function (){
-        $scope.todos.text.sort()
-    }
-
 });
