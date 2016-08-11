@@ -5,35 +5,62 @@
     <title>To-do List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="stylesheet" href="styles/bootstrap.css">
     <!-- inject:css -->
+    <link rel="stylesheet" href="temp/style.css">
     <!-- endinject -->
 </head>
-<body>
+<body ng-app="todoList">
     <div class="container">
-        <div class="row">
-            <div class="col-md-4 .col-md-offset-2 well">
-                <div class="input-group">
-                  <span class="input-group-addon" id="basic-addon1">Text</span>
-                  <input type="text" class="form-control" placeholder="Text" aria-describedby="basic-addon1">
-                </div>
+        <div class="row" ng-controller="addTodo">
+            <div class="col-md-4" >
+                        <h1>Add a To-do Item</h1>
+                <div class="well">
+                    <form>
+                      <div class="form-group">
+                        <label for="textInput">{{todo.text}}</label>
+                        <input ng-model="todo.text" type="text" class="form-control" id="textInput">
+                      </div>
 
-                <div class="input-group">
-                  <select name="" id="">
-                      <option value="high">High priority</option>
-                      <option value="med">Medium priority</option>
-                      <option value="low">Low priority</option>
-                  </select>
-                </div>
+                      <div class="form-group">
+                        <label for="priorityInput">Priority</label>
+                        <select ng-model="todo.priority" class="form-control" id="priorityInput">
+                            <option disabled selected value>- select a priority --</option>
+                            <option value="1">High Priority</option>
+                            <option value="2">Medium Priority</option>
+                            <option value="3">Low Priority</option>
+                        </select>
+                      </div>
 
-                <button>Submit</button>
+                      <button type="submit" class="btn btn-default" ng-click="addTodoBtn()">Add Item</button>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-4 .col-md-offset-1">test2</div>
+
+            <div class="col-md-6 col-md-offset-1" ng-controller="removeTodos">
+                <h1>Tasks</h1>
+                <button ng-click="sortOrder='+priority';" class="btn btn-danger">
+                    Order by Highest Priority
+                </button>
+                <button ng-click="sortOrder='-priority';" class="btn btn-warning">
+                    Order by Lowest Priority
+                </button>
+                <button ng-click="sortOrder='text';" class="btn btn-info">
+                    Order Alphabetically
+                </button>
+                <div ng-repeat="key in todos | orderBy:sortOrder">
+                    <p class="lead" ng-class="{
+                        'bg-danger': key.priority==='1',
+                        'bg-warning': key.priority==='2',
+                        'bg-success': key.priority==='3'}"><input type="checkbox" ng-click="removeTodoBtn(key)"> {{key.text}}</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- inject:js -->
-    <script src="../dist/libs.min.js"></script>
-    <script src="../dist/main.min.js"></script>
+    <script src="temp/angular.js"></script>
+    <script src="temp/main.js"></script>
     <!-- endinject -->
 </body>
 </html>

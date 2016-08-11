@@ -1,1 +1,6 @@
-angular.module('app', [])
+angular.module('todoList', []);
+
+
+angular.module('todoCtrl').controller('HomeCtrl', function($scope){
+
+})

@@ -9,63 +9,88 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
     rename = require('gulp-rename'),
+    clean = require('gulp-clean'),
     prefix = require('gulp-autoprefixer');
 
-var jsSources = ['src/js/**/*.js'],
+var jsSources = ['src/temp/**/*.js'],
+    // jsSources = ['src/js/**/*.js'],
     cssSources = ['src/styles/**/*.css'],
     htmlSources = ['**/*.html'];
 
-/*********************
- ******************** JavaScript gulp tasks
- ********************/
+//use wiredep for bower concats
+//blow out dist folder
+//use 2nd array argument in tasks that need synchronous operation
+
+/**********************************************************************************************
+JS gulp tasks
+*/
     //basic gulp function maker, first arg is command line name; ie gulp inject.
 gulp.task('concatBowerJs', function(){
-    gulp.src([
-        './bower_components/jquery/dist/jquery.js',
-        './bower_components/bootstrap-sass/assets/javascripts/bootstrap.js',
-        './bower_components/angular/angular.js'])
+    // gulp.src([
+    //     './bower_components/jquery/dist/jquery.js',
+    //     './bower_components/bootstrap-sass/assets/javascripts/bootstrap.js',
+    //     './bower_components/angular/angular.js'])
+    gulp.src('bower_components/**/*.min.js')
+    .pipe(wiredep())
     .pipe(concat("libs.js"))
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('concatSrcJs', function(){
+gulp.task('concatCustomJs', function(){
     gulp.src(['./src/js/**/*.js'])
     .pipe(concat('main.js'))
     .pipe(gulp.dest('./dist/'))
 });
 
 gulp.task('minJs', function(){
-    gulp.src(['./dist/*.js'])
-    .pipe(uglify())
-    .pipe(rename(function (path) {
-        path.basename += ".min";
-        path.extname = ".js";
-        return path;
+    if (!gulp.src('./dist/main.min.js')) {
+        gulp.src(['./dist/main.js'])
+        .pipe(uglify())
+        .pipe(rename(function (path) {
+            path.basename += ".min";
+            path.extname = ".js";
+            return path;
+        }))
+        .pipe(gulp.dest('./dist/'))
+    }
+});
+
+/**********************************************************************************************
+CSS gulp tasks
+*/
+
+gulp.task('compileBowerSass', function(){
+     gulp.src('src/styles/style.scss')
+    .pipe(sass({
+        loadPath: ['src/styles/style.scss']
     }))
     .pipe(gulp.dest('./dist/'))
 });
 
-/*********************
-********************* CSS gulp tasks
-*********************/
+gulp.task('compileCustomSass', function(){
+    gulp.src(['./src/styles/*.scss'])
+    .pipe(sass())
+    .pipe(gulp.dest('./dist/'))
+});
+
 gulp.task('concatBowerCSS', function(){
-    gulp.src([
-        './bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss'])
+    gulp.src('bower_components/**/*.scss')
+    .pipe(sass())
+    .pipe(wiredep())
     .pipe(concat('libs.scss'))
     .pipe(gulp.dest('./dist/'))
 });
 
-gulp.task('sass', function(){
-    gulp.src([
-        './bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss'])
-    .pipe(sass().on('error', sass.logError))
+gulp.task('concatCustomCSS', function(){
+    gulp.src(['./src/styles/*.scss'])
+    .pipe(concat('main.scss'))
+    .pipe(sass())
     .pipe(gulp.dest('./dist/'))
 });
 
-gulp.task('concatSrcCSS', function(){
-    gulp.src([
-        './src/styles/*.css'])
-    .pipe(concat('main.css'))
+gulp.task('prefixCSS', function(){
+    gulp.src(['./dist/*.css'])
+    .pipe(prefix())
     .pipe(gulp.dest('./dist/'))
 });
 
@@ -82,7 +107,7 @@ gulp.task('minCSS', function(){
 
 
 gulp.task('inject', function(){
-    var sources = gulp.src(['./dist/*.min.css', './dist/*.min.js'])
+    var sources = gulp.src(['./dist/*.css', './dist/*.js'])
     gulp.src('./src/index.html')
         .pipe(wiredep())
         .pipe(inject(sources, {relative: true}))
@@ -93,7 +118,7 @@ gulp.task('connect', function(){
     connect.server({
         root: './src',
         livereload: true,
-        port: 8002
+        port: 8001
     })
 });
 
@@ -120,4 +145,6 @@ gulp.task('css', function() {
         .pipe(connect.reload())
 });
 
-gulp.task('serve', ['concatBowerJs', 'concatSrcJs', 'minJs', 'concatBowerCSS', 'sass', 'concatSrcCSS', 'minCSS', 'inject', 'connect', 'watch']);
+gulp.task('serve', ['concatBowerJs', 'concatCustomJs', 'concatBowerCSS', 'sass', 'concatCustomCSS','prefixCSS', 'minCSS',  'inject', 'connect', 'watch']);
+
+gulp.task('dev', ['concatBowerJs', 'concatCustomJs', 'inject','connect', 'watch']);
