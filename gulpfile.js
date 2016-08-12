@@ -147,4 +147,4 @@ gulp.task('css', function() {
 
 gulp.task('serve', ['concatBowerJs', 'concatCustomJs', 'concatBowerCSS', 'sass', 'concatCustomCSS','prefixCSS', 'minCSS',  'inject', 'connect', 'watch']);
 
-gulp.task('dev', ['concatBowerJs', 'concatCustomJs', 'inject','connect', 'watch']);
+gulp.task('dev', ['connect', 'watch']);
