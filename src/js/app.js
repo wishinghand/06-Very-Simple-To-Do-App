@@ -1,6 +1,19 @@
-angular.module('todoList', []);
+var todoApp = angular.module('todoList', []);
 
+todoApp.controller('addTodo', function($scope){
+    $scope.todos = [];
+    $scope.todo = {};
 
-angular.module('todoCtrl').controller('HomeCtrl', function($scope){
-
+    $scope.addTodoBtn = function(){
+        $scope.todos.push($scope.todo);
+        $scope.todo = {};
+    }
 })
+
+.controller('removeTodos', function($scope){
+    $scope.removeTodoBtn = function(task){
+        var removalIndex = $scope.todos.indexOf(task)
+        $scope.todos.splice(removalIndex, 1);
+    }
+
+});
