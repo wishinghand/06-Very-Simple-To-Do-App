@@ -1,18 +1,17 @@
-# Day 7 at Origin Code Academy
+# Project 14 at Origin Code Academy
 
-## To-do list
-
-A low-level todo list with priority and alphabetical sorting. Tasks are cleared with splicing out of the `todo` array when their respective checkbox is clicked. Tasks are colored through `ng-class` and styled with basic Bootstrap warning/success/info classes.
+## To-do list with SQL backend
 
 After cloning run:
 `npm install`
 then
-`gulp dev`
-and it will run on localhost at port 8001.
+`gulp serve`
+and it will run on localhost at port 8889. If you want to run it on a different port, change it in the `gulp connect` task.
 
 Technologies used:
 - HTML
-- Bootstrap
+- CSS
+    + Bulma
 - Javascript
     + Angular
 - Gulp

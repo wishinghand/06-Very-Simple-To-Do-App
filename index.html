@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To-do List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- inject:css -->
+    <link rel="stylesheet" href="build/build.css">
+    <!-- endinject -->
+</head>
+<body ng-app="app" class="container is-fluid">
+    <div class="columns">
+        <div class="content column" ng-controller="TodoController as todo">
+                <h1>Add a To-do Item</h1>
+                <form>
+                    <label for="textInput" class="label">Enter a to-do item</label>
+                    <!-- ng-model has `todo` prefix for namespacing reasons -->
+                    <input ng-model="" type="text" class="input" id="textInput" placeholder="Buy groceries">
+
+                    <label for="priorityInput" class="label">Priority</label>
+                    <select ng-model="todo.priority" class="select" id="priorityInput">
+                        <option disabled selected value>- select a priority --</option>
+                        <option value="1">High Priority</option>
+                        <option value="2">Medium Priority</option>
+                        <option value="3">Low Priority</option>
+                    </select>
+
+                  <button type="submit" class="button is-success" ng-click="addTodoBtn()">Add Item</button>
+                </form>
+        </div>
+
+        <div class="column content" ng-controller="">
+            <h1>Tasks</h1>
+            <!-- ng-click changes priority defintion, but not sure how it works without object prefix -->
+            <button ng-click="sortOrder='+priority';" class="button is-danger">
+                Order by Highest Priority
+            </button>
+            <button ng-click="sortOrder='-priority';" class="button is-success">
+                Order by Lowest Priority
+            </button>
+            <button ng-click="sortOrder='text';" class="button is-info">
+                Order Alphabetically
+            </button>
+            <div ng-repeat="key in todos | orderBy:sortOrder" class="content">
+                <li class="" ng-class="{
+                    'tag is-danger': key.priority==='1',
+                    'tag is-warning': key.priority==='2',
+                    'tag is-success': key.priority==='3'}"> {{}}
+                        <span class="tag is-large">
+                            <button ng-click="removeTodoBtn(key)" class="delete"></button>
+                        </span>
+                </li>
+            </div>
+        </div>
+    </div>
+
+    <!-- inject:js -->
+    <script src="build/build.js"></script>
+    <!-- endinject -->
+</body>
+</html>

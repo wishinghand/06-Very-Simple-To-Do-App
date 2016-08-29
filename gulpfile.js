@@ -1,131 +1,63 @@
 var gulp = require('gulp'),
-    gutil = require('gulp-util'),
     inject = require('gulp-inject'),
-    wiredep = require('wiredep').stream,
     livereload = require('gulp-livereload'),
     connect = require('gulp-connect'),
-    open = require('gulp-open'),
     sass = require('gulp-sass'),
-    uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
-    rename = require('gulp-rename'),
-    clean = require('gulp-clean'),
-    prefix = require('gulp-autoprefixer');
+    // uncss = require('gulp-uncss'),
+    runSequence = require('run-sequence'),
+    clean = require('gulp-clean');
 
-var jsSources = ['src/temp/**/*.js'],
-    // jsSources = ['src/js/**/*.js'],
-    cssSources = ['src/styles/**/*.css'],
+var jsSources = ['src/**/*.js'],
+    cssSources = ['src/style/**/*.scss', 'src/style/**/*.css'],
     htmlSources = ['**/*.html'];
 
-//use wiredep for bower concats
-//blow out dist folder
-//use 2nd array argument in tasks that need synchronous operation
-
-/**********************************************************************************************
-JS gulp tasks
-*/
-    //basic gulp function maker, first arg is command line name; ie gulp inject.
-gulp.task('concatBowerJs', function(){
-    // gulp.src([
-    //     './bower_components/jquery/dist/jquery.js',
-    //     './bower_components/bootstrap-sass/assets/javascripts/bootstrap.js',
-    //     './bower_components/angular/angular.js'])
-    gulp.src('bower_components/**/*.min.js')
-    .pipe(wiredep())
-    .pipe(concat("libs.js"))
-    .pipe(gulp.dest('./dist'));
+gulp.task('clean', function(){
+    return gulp.src('./build/*.*', {read: false})
+    .pipe(clean());
 });
 
-gulp.task('concatCustomJs', function(){
-    gulp.src(['./src/js/**/*.js'])
-    .pipe(concat('main.js'))
-    .pipe(gulp.dest('./dist/'))
+/**JS gulp tasks*****************************************************************/
+gulp.task('concatJs', function(){
+    return gulp.src(['node_modules/lodash/lodash.js', 'node_modules/angular/angular.js', 'node_modules/angular-toastr/dist/angular-toastr.js', 'node_modules/angular-toastr/dist/angular-toastr.tpls.js', './src/**/*.module.js', './src/**/*.js'])
+    .pipe(concat('build.js'))
+    .pipe(gulp.dest('./build/'))
 });
 
-gulp.task('minJs', function(){
-    if (!gulp.src('./dist/main.min.js')) {
-        gulp.src(['./dist/main.js'])
-        .pipe(uglify())
-        .pipe(rename(function (path) {
-            path.basename += ".min";
-            path.extname = ".js";
-            return path;
-        }))
-        .pipe(gulp.dest('./dist/'))
-    }
-});
-
-/**********************************************************************************************
-CSS gulp tasks
-*/
-
-gulp.task('compileBowerSass', function(){
-     gulp.src('src/styles/style.scss')
-    .pipe(sass({
-        loadPath: ['src/styles/style.scss']
-    }))
-    .pipe(gulp.dest('./dist/'))
-});
-
-gulp.task('compileCustomSass', function(){
-    gulp.src(['./src/styles/*.scss'])
+/**CSS gulp tasks*****************************************************************/
+gulp.task('compileSass', function(){
+    return gulp.src(['node_modules/angular-toastr/dist/angular-toastr.css', 'node_modules/animate.css/animate.css', 'node_modules/bulma/bulma.sass', './src/css/*.scss', './src/css/*.css'])
     .pipe(sass())
-    .pipe(gulp.dest('./dist/'))
+    //and concatenates them
+    .pipe(concat('build.css'))
+    .pipe(gulp.dest('./build/'));
 });
 
-gulp.task('concatBowerCSS', function(){
-    gulp.src('bower_components/**/*.scss')
-    .pipe(sass())
-    .pipe(wiredep())
-    .pipe(concat('libs.scss'))
-    .pipe(gulp.dest('./dist/'))
-});
-
-gulp.task('concatCustomCSS', function(){
-    gulp.src(['./src/styles/*.scss'])
-    .pipe(concat('main.scss'))
-    .pipe(sass())
-    .pipe(gulp.dest('./dist/'))
-});
-
-gulp.task('prefixCSS', function(){
-    gulp.src(['./dist/*.css'])
-    .pipe(prefix())
-    .pipe(gulp.dest('./dist/'))
-});
-
-gulp.task('minCSS', function(){
-    gulp.src(['./dist/*.css'])
-    .pipe(uglify())
-    .pipe(rename(function (path) {
-        path.basename += ".min";
-        path.extname = ".css";
-        return path;
-    }))
-    .pipe(gulp.dest('./dist/'))
-});
-
+// gulp.task('copyFonts', function() {
+//     return gulp.src(['node_modules/font-awesome/fonts/*'])
+//             .pipe(gulp.dest('./fonts'));
+// });
 
 gulp.task('inject', function(){
-    var sources = gulp.src(['./dist/*.css', './dist/*.js'])
-    gulp.src('./src/index.html')
-        .pipe(wiredep())
+    var sources = gulp.src(['./build/*.css', './build/*.js'], {read: false})
+    // var sources = gulp.src(['./build/*.css', './src/core/lodash.min.js', './node_modules/angular/angular.js', './node_modules/checklist-model/checklist-model.js', './src/core/angular-simple-logger.js', './src/core/angular-google-maps.js', './src/core/app.module.js', './src/secrets/keys.value.js', './src/core/*.js', './src/search/addressInput.controller.js'], {read: false})
+    return gulp.src('index.html')
         .pipe(inject(sources, {relative: true}))
-        .pipe(gulp.dest('./src'));
+        .pipe(gulp.dest('./'));
 });
 
 gulp.task('connect', function(){
-    connect.server({
-        root: './src',
+    return connect.server({
+        root: './',
         livereload: true,
-        port: 8001
+        port: 8889
     })
 });
 
 //checks js/html/css on change...
 gulp.task('watch', function() {
-    gulp.watch(jsSources, ['js']);
-    gulp.watch(cssSources, ['css']);
+    gulp.watch(jsSources, ['concatJs', 'js']);
+    gulp.watch(cssSources, ['compileSass', 'css']);
     gulp.watch(htmlSources, ['html']);
 });
 
@@ -145,6 +77,16 @@ gulp.task('css', function() {
         .pipe(connect.reload())
 });
 
-gulp.task('serve', ['concatBowerJs', 'concatCustomJs', 'concatBowerCSS', 'sass', 'concatCustomCSS','prefixCSS', 'minCSS',  'inject', 'connect', 'watch']);
+// gulp.task('uncss', function() {
+//     gulp.src('./build.css')
+//         .pipe(uncss({
+//             html: ['index.html', './src/about.html']
+//         }))
+//         .pipe(gulp.dest('./build'));
+// });
 
-gulp.task('dev', ['connect', 'watch']);
+gulp.task('serve', function(done) {
+    runSequence('clean', 'concatJs', 'compileSass', 'inject', 'connect', 'watch', function() {
+        done();
+    });
+});
